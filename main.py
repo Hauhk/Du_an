@@ -6,7 +6,7 @@ import PySimpleGUI as ps
 file_data = pd.read_excel('D:\\Me\\Python\\Du_an\\Data.xlsx')
 table_data = file_data.values.tolist()
 table_header = file_data.columns.tolist()
-id_number = file_data['ID'].values
+id_sanpham = file_data['ID'].values
 sanpham = file_data['Tên sản phẩm'].values
 
 # Tạo Bảng điểu khiển
@@ -21,8 +21,8 @@ layout = [
     ps.Button("Save", button_color='green'), 
     ps.Button("Search", button_color='yellow'), 
     ps.Button("Delete", button_color='red'), 
-    ps.Button("Exit", button_color='black'),
-    ps.Button("Reset", button_color='gray')],
+    ps.Button("Reset", button_color='gray'),
+    ps.Button("Exit", button_color='black')],
     [ps.Table(values = table_data,    
             headings = table_header,
             key="Table",
@@ -32,14 +32,12 @@ layout = [
             expand_y= True,)]
     ]
 
-
 window = ps.Window("Thông tin sản phẩm",layout)
 # Tạo hàm clear
 def clear_input():
     for key in values:
-        window[key](" ")
+        window[key]("")
     return None
-    
 
 while True:
     # Lấy giá trị button và giá trị truyền vào
@@ -49,28 +47,28 @@ while True:
         break
     # Thêm, sửa sản phẩm 
     if event == "Save":
-        check_id = int(values['ID'])
+        if values['ID'] == '':
+            check_id = 0
+        else: check_id = int(values['ID'])
         check_sp = values['Tên sản phẩm']
-        if check_id == "" or check_sp == "":
+        if check_id == 0 or check_sp == "":
             ps.popup("Vui lòng nhập đầy đủ thông tin sản phẩm")
-        elif check_id in id_number:
-            ps.popup('Một sản phẩm không thể có 2 ID')
-        # Thêm sản phẩm mới
-        # sửa sản phẩm theo tên sản phẩm
-        elif check_sp in sanpham:
-            indexa = file_data.loc[file_data['Tên sản phẩm'] == check_sp].index.to_list()[0]
+        # Thêm sản phẩm 
+        elif check_id not in id_sanpham and check_sp not in sanpham :
+            del values['Table']
+            file_data = file_data.append(values,ignore_index=True)
+            file_data.to_excel('D:\\Me\\Python\\Du_an\\Data.xlsx', index=False)
+            ps.Popup("Thêm thành công")
+        elif check_id in id_sanpham :
+            indexa = file_data.loc[file_data['ID'] == check_id].index.to_list()[0]
             header_list = list(file_data.columns.values)
             for key in header_list : 
                 file_data.loc[indexa,key] = values[key]
             file_data.to_excel('D:\\Me\\Python\\Du_an\\Data.xlsx', index=False)
             ps.Popup("Sửa thành công")
-            clear_input()
-        else :
-            del values['Table']
-            file_data = file_data.append(values,ignore_index=True)
-            file_data.to_excel('D:\\Me\\Python\\Du_an\\Data.xlsx', index=False)
-            ps.Popup("Thêm thành công")
-            clear_input()
+        elif check_id not in id_sanpham and check_sp in sanpham :
+            ps.popup("Trùng lập sản phẩm")
+        clear_input()
     # Tìm sản phẩm theo ID vầ Tên sản phẩm 
     if event == "Search":
         check_sp = values['Tên sản phẩm']
@@ -88,7 +86,7 @@ while True:
                 for key, value in dicta.items():
                     window[key].update(value)
             # Tìm theo tên ID và xuất giá trị vào các trường      
-            elif check_id in id_number:
+            elif check_id in id_sanpham:
                 indexa = file_data.loc[file_data['ID'] == int(check_id)].index.to_list()[0]
                 file_data_id = file_data.loc[indexa]
                 dicta = file_data_id.to_dict()             
@@ -107,11 +105,14 @@ while True:
                 delete_file_data.to_excel('D:\\Me\\Python\\Du_an\\Data.xlsx', index=False)
                 ps.Popup("Xóa thành công")
                 clear_input()
+    # Xuất data sau khi xóa 
+    if event == "Data" :
+        file_data1 = pd.read_excel('D:\\Me\\Python\\Du_an\\Data.xlsx')
+        val = file_data1.values.tolist()
+        window['Table'].update(values = val)   
     # Clear bảng tính
     if event == "Reset" :
         clear_input()
-    # Xuất data sau khi sửa 
-    if event == "Data" :
-        val = file_data.values.tolist()
-        window['Table'].update(values = val)    
+
+ 
  
