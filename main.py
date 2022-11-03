@@ -53,6 +53,9 @@ while True:
         check_sp = values['Tên sản phẩm']
         if check_id == "" or check_sp == "":
             ps.popup("Vui lòng nhập đầy đủ thông tin sản phẩm")
+        elif check_id in id_number:
+            ps.popup('Một sản phẩm không thể có 2 ID')
+        # Thêm sản phẩm mới
         # sửa sản phẩm theo tên sản phẩm
         elif check_sp in sanpham:
             indexa = file_data.loc[file_data['Tên sản phẩm'] == check_sp].index.to_list()[0]
@@ -62,9 +65,6 @@ while True:
             file_data.to_excel('D:\\Me\\Python\\Du_an\\Data.xlsx', index=False)
             ps.Popup("Sửa thành công")
             clear_input()
-        elif check_id in id_number:
-            ps.popup('ID sản phẩm đã tồn tại')
-        # Thêm sản phẩm mới
         else :
             del values['Table']
             file_data = file_data.append(values,ignore_index=True)
@@ -76,12 +76,12 @@ while True:
         check_sp = values['Tên sản phẩm']
         if values['ID'] == '':
             check_id = 0
-        else: check_id = values['ID']
-        if check_id =='' and check_sp =='' :
+        else: check_id = int(values['ID'])
+        if check_id == 0 and check_sp =='' :
             ps.popup('Vui lòng nhập thông tin sản phẩm ')
         else :
             # Tìm theo tên sản phẩm và xuất giá trị vào các trường
-            if check_sp in sanpham and check_id == '':
+            if check_sp in sanpham and check_id == 0:
                 indexa = file_data.loc[file_data['Tên sản phẩm'] == check_sp].index.to_list()[0]
                 file_data_id = file_data.loc[indexa]
                 dicta = file_data_id.to_dict()             
